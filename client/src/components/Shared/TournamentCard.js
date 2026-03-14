@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import ShareButton from './ShareButton';
 
 const EMOJI = {
   cricket: '🏏', football: '⚽', basketball: '🏀', volleyball: '🏐',
@@ -17,14 +18,13 @@ const fmtDate = (d) =>
   new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function TournamentCard({ t }) {
-  const navigate  = useNavigate();
-  const emoji     = EMOJI[t.sport?.toLowerCase()] || '🏆';
-  const fill      = Math.min(100, Math.round(((t.registeredCount || 0) / t.maxSlots) * 100));
-  const fillCls   = fill >= 90 ? 'danger' : fill >= 70 ? 'warn' : '';
+  const navigate = useNavigate();
+  const emoji = EMOJI[t.sport?.toLowerCase()] || '🏆';
+  const fill = Math.min(100, Math.round(((t.registeredCount || 0) / t.maxSlots) * 100));
+  const fillCls = fill >= 90 ? 'danger' : fill >= 70 ? 'warn' : '';
 
   return (
     <div className="t-card" onClick={() => navigate(`/tournaments/${t._id}`)}>
-      {/* Image banner */}
       <div className="t-card-img">
         <span>{emoji}</span>
         <div style={{ position: 'absolute', top: 10, left: 10 }}>
@@ -36,7 +36,6 @@ export default function TournamentCard({ t }) {
       </div>
 
       <div className="t-card-body">
-        {/* Title + fee */}
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', alignItems: 'flex-start' }}>
           <h3 className="t-card-title" style={{ flex: 1 }}>{t.title}</h3>
           <span style={{ fontWeight: 700, color: 'var(--gold)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
@@ -44,19 +43,16 @@ export default function TournamentCard({ t }) {
           </span>
         </div>
 
-        {/* Meta */}
         <div className="t-card-meta">
           <span>🏅 {t.sport}</span>
           <span>📍 {t.location?.city}</span>
           <span>{t.indoorOutdoor === 'indoor' ? '🏠 Indoor' : '🌿 Outdoor'}</span>
         </div>
 
-        {/* Date */}
         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
           📅 {fmtDate(t.startDate)}
         </div>
 
-        {/* Slot bar */}
         <div style={{ marginBottom: '0.6rem' }}>
           <div className="slot-bar-track">
             <div className={`slot-bar-fill ${fillCls}`} style={{ width: `${fill}%` }} />
@@ -67,17 +63,19 @@ export default function TournamentCard({ t }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="t-card-footer">
           <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
             by {t.host?.name || 'Host'}
           </span>
-          <button
-            className="btn btn-gold btn-sm"
-            onClick={(e) => { e.stopPropagation(); navigate(`/tournaments/${t._id}`); }}
-          >
-            View →
-          </button>
+          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+            <ShareButton tournament={t} variant="icon" />
+            <button
+              className="btn btn-gold btn-sm"
+              onClick={(e) => { e.stopPropagation(); navigate(`/tournaments/${t._id}`); }}
+            >
+              View →
+            </button>
+          </div>
         </div>
       </div>
     </div>

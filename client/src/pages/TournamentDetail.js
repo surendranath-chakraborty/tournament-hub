@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import ShareButton from '../components/Shared/ShareButton';
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -10,19 +11,18 @@ const fmtDate = (d) =>
 const BLANK_PLAYER = { name: '', email: '', phone: '', age: '' };
 
 export default function TournamentDetail() {
-  const { id }   = useParams();
+  const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const [tournament, setTournament] = useState(null);
-  const [myReg,      setMyReg]      = useState(null);
-  const [loading,    setLoading]    = useState(true);
-  const [showModal,  setShowModal]  = useState(false);
-  const [regForm,    setRegForm]    = useState({ teamName: '', players: [{ ...BLANK_PLAYER }] });
+  const [myReg, setMyReg] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [regForm, setRegForm] = useState({ teamName: '', players: [{ ...BLANK_PLAYER }] });
   const [submitting, setSubmitting] = useState(false);
-  const [withdrawing,setWithdrawing]= useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
 
-  /* Fetch tournament + my registration */
   useEffect(() => {
     const load = async () => {
       try {
@@ -45,8 +45,7 @@ export default function TournamentDetail() {
     load();
   }, [id, user, navigate]);
 
-  /* Helpers for the player form */
-  const addPlayer    = () => setRegForm((p) => ({ ...p, players: [...p.players, { ...BLANK_PLAYER }] }));
+  const addPlayer = () => setRegForm((p) => ({ ...p, players: [...p.players, { ...BLANK_PLAYER }] }));
   const removePlayer = (i) => setRegForm((p) => ({ ...p, players: p.players.filter((_, idx) => idx !== i) }));
   const updatePlayer = (i, field, val) =>
     setRegForm((p) => {
@@ -55,7 +54,6 @@ export default function TournamentDetail() {
       return { ...p, players: pl };
     });
 
-  /* Register / pay */
   const handleRegister = async () => {
     if (!regForm.players[0].name || !regForm.players[0].email) {
       toast.error('Please fill in at least the first player name and email');
@@ -68,24 +66,23 @@ export default function TournamentDetail() {
     setSubmitting(true);
     try {
       const { data: reg } = await axios.post('/registrations', {
-        tournamentId:     id,
+        tournamentId: id,
         registrationType: tournament.type,
-        teamName:         regForm.teamName,
-        players:          regForm.players,
+        teamName: regForm.teamName,
+        players: regForm.players,
       });
 
       if (tournament.entryFee > 0) {
-        /* Razorpay flow */
         const { data: order } = await axios.post('/payments/create-order', {
           registrationId: reg._id,
         });
         const options = {
-          key:         order.keyId,
-          amount:      order.amount,
-          currency:    order.currency,
-          name:        'Tournament Hub',
+          key: order.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          name: 'Tournament Hub',
           description: tournament.title,
-          order_id:    order.orderId,
+          order_id: order.orderId,
           handler: async (response) => {
             try {
               await axios.post('/payments/verify', {
@@ -100,7 +97,7 @@ export default function TournamentDetail() {
             }
           },
           prefill: { name: user.name, email: user.email, contact: user.phone || '' },
-          theme:   { color: '#F5B800' },
+          theme: { color: '#F5B800' },
         };
         const rzp = new window.Razorpay(options);
         rzp.open();
@@ -120,7 +117,6 @@ export default function TournamentDetail() {
     }
   };
 
-  /* Withdraw */
   const handleWithdraw = async () => {
     if (!window.confirm('Are you sure you want to withdraw? This cannot be undone.')) return;
     setWithdrawing(true);
@@ -144,12 +140,12 @@ export default function TournamentDetail() {
   }
   if (!tournament) return null;
 
-  const fillPct           = Math.min(100, Math.round((tournament.registeredCount / tournament.maxSlots) * 100));
-  const isFull            = tournament.registeredCount >= tournament.maxSlots;
-  const pastReg           = new Date() > new Date(tournament.registrationDeadline);
-  const pastWithdraw      = new Date() > new Date(tournament.withdrawalDeadline);
-  const isMyTournament    = user?.role === 'host' && tournament.host?._id === user?._id;
-  const canRegister       = user?.role === 'player' && !myReg && !pastReg && !['closed','cancelled'].includes(tournament.status);
+  const fillPct = Math.min(100, Math.round((tournament.registeredCount / tournament.maxSlots) * 100));
+  const isFull = tournament.registeredCount >= tournament.maxSlots;
+  const pastReg = new Date() > new Date(tournament.registrationDeadline);
+  const pastWithdraw = new Date() > new Date(tournament.withdrawalDeadline);
+  const isMyTournament = user?.role === 'host' && tournament.host?._id === user?._id;
+  const canRegister = user?.role === 'player' && !myReg && !pastReg && !['closed', 'cancelled'].includes(tournament.status);
 
   const STATUS_BADGE = {
     upcoming: 'badge-upcoming', ongoing: 'badge-ongoing',
@@ -159,7 +155,6 @@ export default function TournamentDetail() {
   return (
     <div style={{ paddingTop: 64 }}>
 
-      {/* ── Hero banner ──────────────────────────────────────── */}
       <div style={{
         background: 'linear-gradient(135deg, var(--dark-2), var(--dark-3))',
         borderBottom: '1px solid var(--border)', padding: '3rem 1.5rem',
@@ -167,7 +162,6 @@ export default function TournamentDetail() {
         <div className="container" style={{ maxWidth: 960 }}>
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start' }}>
 
-            {/* Left info */}
             <div style={{ flex: 1, minWidth: 260 }}>
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                 <span className={`badge ${STATUS_BADGE[tournament.status] || 'badge-upcoming'}`}>{tournament.status}</span>
@@ -185,7 +179,6 @@ export default function TournamentDetail() {
               </p>
             </div>
 
-            {/* Right actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 190, alignItems: 'flex-end' }}>
               <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: '2.8rem', color: 'var(--gold)', lineHeight: 1 }}>
                 {tournament.entryFee > 0 ? `₹${tournament.entryFee}` : 'FREE'}
@@ -194,11 +187,19 @@ export default function TournamentDetail() {
                 entry fee per {tournament.type}
               </div>
 
-              {/* Host controls */}
+              {/* Host controls + Share */}
               {isMyTournament && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   <button className="btn btn-outline btn-sm" onClick={() => navigate(`/tournaments/${id}/edit`)}>✏️ Edit</button>
                   <button className="btn btn-outline btn-sm" onClick={() => navigate(`/tournaments/${id}/registrations`)}>📋 Entries</button>
+                  <ShareButton tournament={tournament} />
+                </div>
+              )}
+
+              {/* Share button for non-hosts too */}
+              {!isMyTournament && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <ShareButton tournament={tournament} />
                 </div>
               )}
 
@@ -206,16 +207,15 @@ export default function TournamentDetail() {
               {user?.role === 'player' && myReg && (
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ marginBottom: '0.5rem' }}>
-                    <span className={`badge ${
-                      myReg.status === 'confirmed'  ? 'badge-green' :
-                      myReg.status === 'waitlisted' ? 'badge-full'  : 'badge-closed'
-                    }`}>
-                      {myReg.status === 'confirmed'  && '✅ Confirmed'}
+                    <span className={`badge ${myReg.status === 'confirmed' ? 'badge-green' :
+                        myReg.status === 'waitlisted' ? 'badge-full' : 'badge-closed'
+                      }`}>
+                      {myReg.status === 'confirmed' && '✅ Confirmed'}
                       {myReg.status === 'waitlisted' && `⏳ Waitlisted #${myReg.waitlistPosition}`}
-                      {!['confirmed','waitlisted'].includes(myReg.status) && myReg.status}
+                      {!['confirmed', 'waitlisted'].includes(myReg.status) && myReg.status}
                     </span>
                   </div>
-                  {!['withdrawn','removed'].includes(myReg.status) && (
+                  {!['withdrawn', 'removed'].includes(myReg.status) && (
                     <>
                       <button className="btn btn-danger btn-sm" onClick={handleWithdraw} disabled={withdrawing}>
                         {withdrawing ? 'Withdrawing…' : 'Withdraw'}
@@ -235,7 +235,6 @@ export default function TournamentDetail() {
                 </button>
               )}
 
-              {/* Registration closed */}
               {!canRegister && !myReg && !isMyTournament && user?.role === 'player' && (
                 <span className="badge badge-closed" style={{ fontSize: '0.8rem' }}>Registration Closed</span>
               )}
@@ -244,11 +243,9 @@ export default function TournamentDetail() {
         </div>
       </div>
 
-      {/* ── Body ─────────────────────────────────────────────── */}
       <div className="container" style={{ maxWidth: 960, padding: '2.5rem 1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
 
-          {/* Left column */}
           <div>
             {tournament.description && (
               <div className="card" style={{ marginBottom: '1.5rem' }}>
@@ -274,17 +271,15 @@ export default function TournamentDetail() {
             {(tournament.prizePool || tournament.firstPrize) && (
               <div className="card card-gold">
                 <h2 style={{ fontWeight: 600, marginBottom: '1rem' }}>🏅 Prizes</h2>
-                {tournament.prizePool    && <p style={{ color: 'var(--gold)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.5rem' }}>{tournament.prizePool}</p>}
-                {tournament.firstPrize   && <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>🥇 1st: {tournament.firstPrize}</p>}
-                {tournament.secondPrize  && <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>🥈 2nd: {tournament.secondPrize}</p>}
+                {tournament.prizePool && <p style={{ color: 'var(--gold)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.5rem' }}>{tournament.prizePool}</p>}
+                {tournament.firstPrize && <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>🥇 1st: {tournament.firstPrize}</p>}
+                {tournament.secondPrize && <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>🥈 2nd: {tournament.secondPrize}</p>}
               </div>
             )}
           </div>
 
-          {/* Right sidebar */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-            {/* Slots */}
             <div className="card">
               <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Slots</h3>
               <div className="slot-bar-track">
@@ -304,14 +299,13 @@ export default function TournamentDetail() {
               )}
             </div>
 
-            {/* Key dates */}
             <div className="card">
               <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>📅 Key Dates</h3>
               {[
                 { lbl: 'Tournament Start', val: fmtDate(tournament.startDate) },
-                { lbl: 'Tournament End',   val: fmtDate(tournament.endDate) },
-                { lbl: 'Register By',      val: fmtDate(tournament.registrationDeadline), warn: pastReg },
-                { lbl: 'Withdraw By',      val: fmtDate(tournament.withdrawalDeadline),   warn: pastWithdraw },
+                { lbl: 'Tournament End', val: fmtDate(tournament.endDate) },
+                { lbl: 'Register By', val: fmtDate(tournament.registrationDeadline), warn: pastReg },
+                { lbl: 'Withdraw By', val: fmtDate(tournament.withdrawalDeadline), warn: pastWithdraw },
               ].map((d) => (
                 <div key={d.lbl} style={{
                   display: 'flex', justifyContent: 'space-between',
@@ -324,18 +318,16 @@ export default function TournamentDetail() {
               ))}
             </div>
 
-            {/* Organizer */}
             <div className="card">
               <h3 style={{ fontWeight: 600, marginBottom: '0.75rem' }}>🧑 Organizer</h3>
               <div style={{ fontWeight: 600 }}>{tournament.host?.name}</div>
-              {tournament.host?.city  && <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 2 }}>📍 {tournament.host.city}</div>}
+              {tournament.host?.city && <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 2 }}>📍 {tournament.host.city}</div>}
               {tournament.host?.email && <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 3 }}>✉️ {tournament.host.email}</div>}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Registration Modal ────────────────────────────────── */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -361,7 +353,6 @@ export default function TournamentDetail() {
               </div>
             )}
 
-            {/* Player rows */}
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500 }}>
@@ -379,17 +370,13 @@ export default function TournamentDetail() {
                       {tournament.type === 'team' ? `Player ${i + 1}` : 'Your Info'}
                     </span>
                     {tournament.type === 'team' && i > 0 && (
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => removePlayer(i)}
-                        style={{ color: 'var(--red)' }}
-                      >✕</button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => removePlayer(i)} style={{ color: 'var(--red)' }}>✕</button>
                     )}
                   </div>
                   <div className="form-row">
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label>Name *</label>
-                      <input placeholder="Full name" value={pl.name}  onChange={(e) => updatePlayer(i, 'name',  e.target.value)} />
+                      <input placeholder="Full name" value={pl.name} onChange={(e) => updatePlayer(i, 'name', e.target.value)} />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label>Email *</label>
