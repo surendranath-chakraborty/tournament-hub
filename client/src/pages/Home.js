@@ -215,7 +215,6 @@ export default function Home() {
     @keyframes slideInLeft   { from{opacity:0;transform:translateX(-50px)} to{opacity:1;transform:translateX(0)} }
     @keyframes slideInRight  { from{opacity:0;transform:translateX(50px)} to{opacity:1;transform:translateX(0)} }
     @keyframes heroTitle     { from{opacity:0;transform:translateY(60px) skewY(3deg)} to{opacity:1;transform:translateY(0) skewY(0)} }
-    @keyframes blink         { 0%,100%{opacity:1} 49%{opacity:1} 50%{opacity:0} 99%{opacity:0} }
 
     /* ── Glitch ── */
     .glitch-before { animation: glitchA 4s infinite; }
@@ -292,8 +291,6 @@ export default function Home() {
       animation:shimmer 3s linear infinite;
     }
 
-    /* ── Cursor blink ── */
-    .cursor { display:inline-block; width:3px; height:0.9em; background:#F5B800; vertical-align:middle; margin-left:4px; animation:blink 1s step-start infinite; }
 
     /* ── Orbit decorations ── */
     .orbit-wrap { position:absolute; width:500px; height:500px; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; opacity:0.35; }
@@ -445,7 +442,6 @@ export default function Home() {
           }
         },
           'Organize, compete, and win. The all-in-one platform for hosting and joining sports tournaments across India.',
-          React.createElement('span', { className: 'cursor' })
         ),
 
         // CTA buttons
