@@ -3,6 +3,54 @@ import axios from 'axios';
 
 var ce = React.createElement;
 
+// ── Robot face SVG ─────────────────────────────────────────────
+function RobotFace(size) {
+    size = size || 24;
+    return ce('svg', {
+        width: size, height: size,
+        viewBox: '0 0 64 64',
+        xmlns: 'http://www.w3.org/2000/svg',
+        style: { display: 'block', flexShrink: 0 },
+    },
+        // Head background
+        ce('rect', { x: 8, y: 12, width: 48, height: 40, rx: 10, ry: 10, fill: '#0A0A0F', stroke: '#F5B800', strokeWidth: 2.5 }),
+        // Antenna base
+        ce('rect', { x: 29, y: 5, width: 6, height: 9, rx: 3, fill: '#F5B800' }),
+        // Antenna top
+        ce('circle', { cx: 32, cy: 4, r: 3.5, fill: '#F5B800' }),
+        // Antenna glow dot
+        ce('circle', { cx: 32, cy: 4, r: 2, fill: '#fff', opacity: 0.7 }),
+        // Left ear bolt
+        ce('rect', { x: 4, y: 24, width: 5, height: 12, rx: 2, fill: '#F5B800' }),
+        // Right ear bolt
+        ce('rect', { x: 55, y: 24, width: 5, height: 12, rx: 2, fill: '#F5B800' }),
+        // Left eye socket
+        ce('rect', { x: 14, y: 22, width: 14, height: 12, rx: 4, fill: '#1A1A26', stroke: '#F5B800', strokeWidth: 1.5 }),
+        // Right eye socket
+        ce('rect', { x: 36, y: 22, width: 14, height: 12, rx: 4, fill: '#1A1A26', stroke: '#F5B800', strokeWidth: 1.5 }),
+        // Left eye glow
+        ce('rect', { x: 17, y: 25, width: 8, height: 6, rx: 2, fill: '#4B9EE8' }),
+        // Left eye shine
+        ce('circle', { cx: 22, cy: 27, r: 1.5, fill: '#fff', opacity: 0.8 }),
+        // Right eye glow
+        ce('rect', { x: 39, y: 25, width: 8, height: 6, rx: 2, fill: '#4B9EE8' }),
+        // Right eye shine
+        ce('circle', { cx: 44, cy: 27, r: 1.5, fill: '#fff', opacity: 0.8 }),
+        // Nose dot
+        ce('circle', { cx: 32, cy: 38, r: 2, fill: '#F5B800', opacity: 0.6 }),
+        // Mouth panel background
+        ce('rect', { x: 14, y: 42, width: 36, height: 7, rx: 3, fill: '#1A1A26', stroke: '#F5B800', strokeWidth: 1 }),
+        // Mouth teeth / grid lines
+        ce('line', { x1: 22, y1: 42, x2: 22, y2: 49, stroke: '#F5B800', strokeWidth: 1, opacity: 0.5 }),
+        ce('line', { x1: 30, y1: 42, x2: 30, y2: 49, stroke: '#F5B800', strokeWidth: 1, opacity: 0.5 }),
+        ce('line', { x1: 38, y1: 42, x2: 38, y2: 49, stroke: '#F5B800', strokeWidth: 1, opacity: 0.5 }),
+        ce('line', { x1: 46, y1: 42, x2: 46, y2: 49, stroke: '#F5B800', strokeWidth: 1, opacity: 0.5 }),
+        // Mouth horizontal divider
+        ce('line', { x1: 14, y1: 45.5, x2: 50, y2: 45.5, stroke: '#F5B800', strokeWidth: 0.8, opacity: 0.4 })
+    );
+}
+
+
 var QUICK = [
     { label: '🏆 How to create a tournament?', text: 'How do I create a tournament as a host?' },
     { label: '🎮 How to register?', text: 'How do I register for a tournament as a player?' },
@@ -134,7 +182,7 @@ export default function ChatBot() {
             // Header
             ce('div', { style: { background: 'linear-gradient(135deg,#1A1A26,#242436)', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(245,184,0,0.15)', flexShrink: 0 } },
                 ce('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-                    ce('div', { style: { width: 36, height: 36, borderRadius: '50%', background: '#F5B800', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 } }, '🏆'),
+                    ce('div', { style: { width: 36, height: 36, borderRadius: '50%', background: '#F5B800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 } }, RobotFace(22)),
                     ce('div', null,
                         ce('div', { style: { fontWeight: 700, fontSize: '0.92rem', color: '#F0EEE8', fontFamily: 'DM Sans, sans-serif' } }, 'TourneyBot'),
                         ce('div', { style: { fontSize: '0.72rem', color: '#22C97D', display: 'flex', alignItems: 'center', gap: 4 } },
@@ -164,7 +212,7 @@ export default function ChatBot() {
                 messages.map(function (m, i) {
                     var isUser = m.role === 'user';
                     return ce('div', { key: i, style: { display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 6 } },
-                        !isUser && ce('div', { style: { width: 26, height: 26, borderRadius: '50%', background: '#F5B800', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', flexShrink: 0, marginBottom: 2 } }, '🏆'),
+                        !isUser && ce('div', { style: { width: 26, height: 26, borderRadius: '50%', background: '#F5B800', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', flexShrink: 0, marginBottom: 2 } }, RobotFace(16)),
                         ce('div', {
                             className: isUser ? 'chat-msg-user' : 'chat-msg-bot',
                         },
@@ -177,7 +225,7 @@ export default function ChatBot() {
 
                 // Typing indicator
                 loading && ce('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 6 } },
-                    ce('div', { style: { width: 26, height: 26, borderRadius: '50%', background: '#F5B800', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', flexShrink: 0 } }, '🏆'),
+                    ce('div', { style: { width: 26, height: 26, borderRadius: '50%', background: '#F5B800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 } }, RobotFace(14)),
                     ce('div', { className: 'chat-msg-bot', style: { display: 'flex', gap: 4, padding: '12px 16px', alignItems: 'center' } },
                         [0, 0.15, 0.3].map(function (delay, i) {
                             return ce('div', {
@@ -261,7 +309,7 @@ export default function ChatBot() {
                 position: 'relative',
             }
         },
-            open ? '✕' : '🏆',
+            open ? ce('span', { style: { fontSize: '1.3rem', lineHeight: 1 } }, '✕') : RobotFace(28),
 
             // Unread badge
             !open && unread > 0 && ce('div', { style: { position: 'absolute', top: -4, right: -4, width: 20, height: 20, borderRadius: '50%', background: '#E84B4B', color: '#fff', fontSize: '0.65rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' } },
