@@ -17,12 +17,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── API Routes ────────────────────────────────────────────────
-app.use('/api/auth',          require('./routes/auth'));
-app.use('/api/tournaments',   require('./routes/tournaments'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tournaments', require('./routes/tournaments'));
 app.use('/api/registrations', require('./routes/registrations'));
-app.use('/api/payments',      require('./routes/payments'));
-app.use('/api/ai',            require('./routes/ai'));
-app.use('/api/users',         require('./routes/users'));
+app.use('/api/payments', require('./routes/payments'));
+app.use('/api/ai', require('./routes/ai'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/live', require('./routes/live'));
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

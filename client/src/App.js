@@ -5,25 +5,26 @@ import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Navbar          from './components/Shared/Navbar';
-import Home            from './pages/Home';
-import Login           from './pages/Login';
-import Register        from './pages/Register';
-import Dashboard       from './pages/Dashboard';
-import TournamentList  from './pages/TournamentList';
+import Navbar from './components/Shared/Navbar';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
 import CreateTournament from './pages/CreateTournament';
-import EditTournament  from './pages/EditTournament';
+import EditTournament from './pages/EditTournament';
 import HostRegistrations from './pages/HostRegistrations';
 import MyRegistrations from './pages/MyRegistrations';
-import AITools         from './pages/AITools';
-import Profile         from './pages/Profile';
+import AITools from './pages/AITools';
+import Profile from './pages/Profile';
+import LiveMatch from './pages/LiveMatch';
 
 /* Route guards */
 function Protected({ children, role }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="loading-wrap"><div className="spinner" /></div>;
-  if (!user)   return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
   if (role && user.role !== role) return <Navigate to="/dashboard" replace />;
   return children;
 }
@@ -33,15 +34,15 @@ function AppRoutes() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/"            element={<Home />} />
-        <Route path="/login"       element={<Login />} />
-        <Route path="/register"    element={<Register />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/tournaments" element={<TournamentList />} />
         <Route path="/tournaments/:id" element={<TournamentDetail />} />
 
-        <Route path="/dashboard"   element={<Protected><Dashboard /></Protected>} />
-        <Route path="/profile"     element={<Protected><Profile /></Protected>} />
-        <Route path="/ai-tools"    element={<Protected><AITools /></Protected>} />
+        <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+        <Route path="/profile" element={<Protected><Profile /></Protected>} />
+        <Route path="/ai-tools" element={<Protected><AITools /></Protected>} />
 
         <Route path="/create-tournament"
           element={<Protected role="host"><CreateTournament /></Protected>} />
@@ -52,6 +53,9 @@ function AppRoutes() {
 
         <Route path="/my-registrations"
           element={<Protected role="player"><MyRegistrations /></Protected>} />
+
+        <Route path="/tournaments/:id/live"
+          element={<Protected><LiveMatch /></Protected>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

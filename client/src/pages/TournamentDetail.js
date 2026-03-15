@@ -23,6 +23,7 @@ export default function TournamentDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
 
+  /* Fetch tournament + my registration */
   useEffect(() => {
     const load = async () => {
       try {
@@ -45,6 +46,7 @@ export default function TournamentDetail() {
     load();
   }, [id, user, navigate]);
 
+  /* Helpers for the player form */
   const addPlayer = () => setRegForm((p) => ({ ...p, players: [...p.players, { ...BLANK_PLAYER }] }));
   const removePlayer = (i) => setRegForm((p) => ({ ...p, players: p.players.filter((_, idx) => idx !== i) }));
   const updatePlayer = (i, field, val) =>
@@ -54,6 +56,7 @@ export default function TournamentDetail() {
       return { ...p, players: pl };
     });
 
+  /* Register / pay */
   const handleRegister = async () => {
     if (!regForm.players[0].name || !regForm.players[0].email) {
       toast.error('Please fill in at least the first player name and email');
@@ -73,6 +76,7 @@ export default function TournamentDetail() {
       });
 
       if (tournament.entryFee > 0) {
+        /* Razorpay flow */
         const { data: order } = await axios.post('/payments/create-order', {
           registrationId: reg._id,
         });
@@ -117,6 +121,7 @@ export default function TournamentDetail() {
     }
   };
 
+  /* Withdraw */
   const handleWithdraw = async () => {
     if (!window.confirm('Are you sure you want to withdraw? This cannot be undone.')) return;
     setWithdrawing(true);
@@ -155,6 +160,7 @@ export default function TournamentDetail() {
   return (
     <div style={{ paddingTop: 64 }}>
 
+      {/* ── Hero banner ──────────────────────────────────────── */}
       <div style={{
         background: 'linear-gradient(135deg, var(--dark-2), var(--dark-3))',
         borderBottom: '1px solid var(--border)', padding: '3rem 1.5rem',
@@ -162,6 +168,7 @@ export default function TournamentDetail() {
         <div className="container" style={{ maxWidth: 960 }}>
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start' }}>
 
+            {/* Left info */}
             <div style={{ flex: 1, minWidth: 260 }}>
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                 <span className={`badge ${STATUS_BADGE[tournament.status] || 'badge-upcoming'}`}>{tournament.status}</span>
@@ -179,6 +186,7 @@ export default function TournamentDetail() {
               </p>
             </div>
 
+            {/* Right actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 190, alignItems: 'flex-end' }}>
               <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: '2.8rem', color: 'var(--gold)', lineHeight: 1 }}>
                 {tournament.entryFee > 0 ? `₹${tournament.entryFee}` : 'FREE'}
@@ -187,16 +195,17 @@ export default function TournamentDetail() {
                 entry fee per {tournament.type}
               </div>
 
-              {/* Host controls + Share */}
+              {/* Host controls */}
               {isMyTournament && (
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   <button className="btn btn-outline btn-sm" onClick={() => navigate(`/tournaments/${id}/edit`)}>✏️ Edit</button>
                   <button className="btn btn-outline btn-sm" onClick={() => navigate(`/tournaments/${id}/registrations`)}>📋 Entries</button>
+                  <button className="btn btn-danger btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={() => navigate(`/tournaments/${id}/live`)}>● Live</button>
                   <ShareButton tournament={tournament} />
                 </div>
               )}
 
-              {/* Share button for non-hosts too */}
+              {/* Share button for everyone (non-host) */}
               {!isMyTournament && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <ShareButton tournament={tournament} />
@@ -235,17 +244,28 @@ export default function TournamentDetail() {
                 </button>
               )}
 
+              {/* Registration closed */}
               {!canRegister && !myReg && !isMyTournament && user?.role === 'player' && (
                 <span className="badge badge-closed" style={{ fontSize: '0.8rem' }}>Registration Closed</span>
               )}
+
+              {/* Live match button for everyone */}
+              <button
+                onClick={() => navigate(`/tournaments/${id}/live`)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(232,75,75,0.12)', border: '1px solid rgba(232,75,75,0.4)', borderRadius: 10, padding: '0.5rem 1rem', color: '#E84B4B', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, marginTop: 4 }}
+              >
+                <span style={{ animation: 'pulse 1.5s infinite' }}>●</span> Watch Live
+              </button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* ── Body ─────────────────────────────────────────────── */}
       <div className="container" style={{ maxWidth: 960, padding: '2.5rem 1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
 
+          {/* Left column */}
           <div>
             {tournament.description && (
               <div className="card" style={{ marginBottom: '1.5rem' }}>
@@ -278,8 +298,10 @@ export default function TournamentDetail() {
             )}
           </div>
 
+          {/* Right sidebar */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+            {/* Slots */}
             <div className="card">
               <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Slots</h3>
               <div className="slot-bar-track">
@@ -299,6 +321,7 @@ export default function TournamentDetail() {
               )}
             </div>
 
+            {/* Key dates */}
             <div className="card">
               <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>📅 Key Dates</h3>
               {[
@@ -318,6 +341,7 @@ export default function TournamentDetail() {
               ))}
             </div>
 
+            {/* Organizer */}
             <div className="card">
               <h3 style={{ fontWeight: 600, marginBottom: '0.75rem' }}>🧑 Organizer</h3>
               <div style={{ fontWeight: 600 }}>{tournament.host?.name}</div>
@@ -328,6 +352,7 @@ export default function TournamentDetail() {
         </div>
       </div>
 
+      {/* ── Registration Modal ────────────────────────────────── */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -353,6 +378,7 @@ export default function TournamentDetail() {
               </div>
             )}
 
+            {/* Player rows */}
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500 }}>
@@ -370,7 +396,11 @@ export default function TournamentDetail() {
                       {tournament.type === 'team' ? `Player ${i + 1}` : 'Your Info'}
                     </span>
                     {tournament.type === 'team' && i > 0 && (
-                      <button className="btn btn-ghost btn-sm" onClick={() => removePlayer(i)} style={{ color: 'var(--red)' }}>✕</button>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => removePlayer(i)}
+                        style={{ color: 'var(--red)' }}
+                      >✕</button>
                     )}
                   </div>
                   <div className="form-row">
