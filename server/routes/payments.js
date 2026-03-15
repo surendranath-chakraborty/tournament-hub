@@ -1,43 +1,36 @@
-const express      = require('express');
-const router       = express.Router();
-const Razorpay     = require('razorpay');
-const crypto       = require('crypto');
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
 const Registration = require('../models/Registration');
-const Tournament   = require('../models/Tournament');
-const User         = require('../models/User');
-const { protect }  = require('../middleware/auth');
+const Tournament = require('../models/Tournament');
+const User = require('../models/User');
+const { protect } = require('../middleware/auth');
 
-const getRazorpay = () =>
-  new Razorpay({
-    key_id:     process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-  });
+// Generate a fake but realistic-looking payment/order ID
+function genId(prefix) {
+  return prefix + '_' + Date.now() + '_' + crypto.randomBytes(6).toString('hex').toUpperCase();
+}
 
 // POST /api/payments/create-order
-router.post('/create-order', protect, async (req, res) => {
+// Creates a payment order (no third party needed)
+router.post('/create-order', protect, async function (req, res) {
   try {
-    const { registrationId } = req.body;
-    const reg = await Registration.findById(registrationId).populate('tournament');
+    var registrationId = req.body.registrationId;
+    var reg = await Registration.findById(registrationId).populate('tournament');
     if (!reg) return res.status(404).json({ message: 'Registration not found' });
     if (reg.user.toString() !== req.user._id.toString())
       return res.status(403).json({ message: 'Not your registration' });
 
-    const amount = reg.tournament.entryFee * 100; // paise
-    const razorpay = getRazorpay();
-    const order = await razorpay.orders.create({
-      amount,
-      currency: 'INR',
-      receipt: `reg_${registrationId}`,
-    });
-
-    reg.orderId = order.id;
+    var orderId = genId('order');
+    reg.orderId = orderId;
     await reg.save();
 
     res.json({
-      orderId:  order.id,
-      amount:   order.amount,
-      currency: order.currency,
-      keyId:    process.env.RAZORPAY_KEY_ID,
+      orderId: orderId,
+      amount: reg.tournament.entryFee,
+      currency: 'INR',
+      tournamentName: reg.tournament.title,
+      registrationId: registrationId,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -45,34 +38,33 @@ router.post('/create-order', protect, async (req, res) => {
 });
 
 // POST /api/payments/verify
-router.post('/verify', protect, async (req, res) => {
+// Confirms the payment after user completes checkout
+router.post('/verify', protect, async function (req, res) {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      registrationId,
-    } = req.body;
+    var registrationId = req.body.registrationId;
+    var orderId = req.body.orderId;
+    var cardLast4 = req.body.cardLast4 || '0000';
+    var paymentMethod = req.body.paymentMethod || 'card';
 
-    // Verify HMAC signature
-    const expected = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
-
-    if (expected !== razorpay_signature)
-      return res.status(400).json({ message: 'Payment verification failed – invalid signature' });
-
-    const reg        = await Registration.findById(registrationId);
+    var reg = await Registration.findById(registrationId);
     if (!reg) return res.status(404).json({ message: 'Registration not found' });
-    const tournament = await Tournament.findById(reg.tournament);
+    if (reg.user.toString() !== req.user._id.toString())
+      return res.status(403).json({ message: 'Not your registration' });
 
-    const isFull = tournament.registeredCount >= tournament.maxSlots;
+    // Verify the orderId matches what we issued
+    if (reg.orderId !== orderId)
+      return res.status(400).json({ message: 'Invalid order. Please try again.' });
+
+    var tournament = await Tournament.findById(reg.tournament);
+    var isFull = tournament.registeredCount >= tournament.maxSlots;
+
+    // Generate payment ID
+    var paymentId = genId('pay');
 
     reg.paymentStatus = 'paid';
-    reg.paymentId     = razorpay_payment_id;
-    reg.amountPaid    = tournament.entryFee;
-    reg.status        = isFull ? 'waitlisted' : 'confirmed';
+    reg.paymentId = paymentId;
+    reg.amountPaid = tournament.entryFee;
+    reg.status = isFull ? 'waitlisted' : 'confirmed';
 
     if (!isFull) {
       tournament.registeredCount += 1;
@@ -88,7 +80,12 @@ router.post('/verify', protect, async (req, res) => {
     await reg.save();
     await tournament.save();
 
-    res.json({ message: 'Payment verified ✅', status: reg.status });
+    res.json({
+      message: 'Payment successful',
+      status: reg.status,
+      paymentId: paymentId,
+      amount: tournament.entryFee,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -3,21 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const SPORTS = ['Cricket','Football','Basketball','Volleyball','Badminton','Tennis','Kabaddi','Chess','Table Tennis','Swimming','Athletics','Boxing','Other'];
-const CITIES = ['Mumbai','Delhi','Bangalore','Chennai','Kolkata','Hyderabad','Pune','Ahmedabad','Jaipur','Surat','Bardhaman','Patna','Lucknow','Bhopal','Nagpur','Indore'];
+const SPORTS = ['Cricket', 'Football', 'Basketball', 'Volleyball', 'Badminton', 'Tennis', 'Kabaddi', 'Chess', 'Table Tennis', 'Swimming', 'Athletics', 'Boxing', 'Other'];
+const CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat', 'Bardhaman', 'Patna', 'Lucknow', 'Bhopal', 'Nagpur', 'Indore'];
 
-const today    = () => new Date().toISOString().split('T')[0];
-const addDays  = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+const today = () => new Date().toISOString().split('T')[0];
+const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
 
 const INIT = {
   title: '', sport: '', description: '', rules: '',
   type: 'team', indoorOutdoor: 'outdoor',
   location: { city: '', venue: '', address: '' },
-  startDate:            addDays(7),
-  endDate:              addDays(8),
+  startDate: addDays(7),
+  endDate: addDays(8),
   registrationDeadline: addDays(5),
-  withdrawalDeadline:   addDays(6),
-  editDeadline:         addDays(5),
+  withdrawalDeadline: addDays(6),
+  editDeadline: addDays(5),
   maxSlots: 8, entryFee: 0,
   prizePool: '', firstPrize: '', secondPrize: '',
 };
@@ -25,21 +25,21 @@ const INIT = {
 const STEPS = ['Basic Info', 'Location & Dates', 'Slots & Fees', 'Rules & Prizes'];
 
 export default function CreateTournament() {
-  const navigate        = useNavigate();
+  const navigate = useNavigate();
   const [form, setForm] = useState(INIT);
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
 
-  const set    = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
   const setLoc = (k, v) => setForm((p) => ({ ...p, location: { ...p.location, [k]: v } }));
 
   const validate = () => {
     if (step === 1) {
       if (!form.title.trim()) { toast.error('Tournament title is required'); return false; }
-      if (!form.sport)        { toast.error('Please select a sport');         return false; }
+      if (!form.sport) { toast.error('Please select a sport'); return false; }
     }
     if (step === 2) {
-      if (!form.location.city)  { toast.error('Please select a city');    return false; }
+      if (!form.location.city) { toast.error('Please select a city'); return false; }
       if (!form.location.venue.trim()) { toast.error('Venue name is required'); return false; }
     }
     return true;
@@ -76,7 +76,7 @@ export default function CreateTournament() {
               <div style={{
                 height: 4, borderRadius: 4, marginBottom: 6,
                 background: i + 1 <= step ? '#F5B800' : 'var(--dark-4)',
-                opacity:    i + 1 <  step ? 0.6       : i + 1 === step ? 1 : 0.3,
+                opacity: i + 1 < step ? 0.6 : i + 1 === step ? 1 : 0.3,
               }} />
               <div style={{ fontSize: '0.68rem', color: i + 1 === step ? '#F5B800' : 'var(--text-dim)', whiteSpace: 'nowrap' }}>
                 {s}
@@ -218,9 +218,9 @@ export default function CreateTournament() {
               </div>
               {form.entryFee > 0 ? (
                 <div className="alert alert-info">
-                  💳 Payments collected via Razorpay. Estimated revenue if all slots fill:&nbsp;
+                  💳 Payments collected securely via our payment gateway. Estimated revenue:&nbsp;
                   <strong>₹{(form.entryFee * form.maxSlots).toLocaleString()}</strong>.
-                  Make sure your Razorpay keys are in <code>.env</code>.
+
                 </div>
               ) : (
                 <div className="alert alert-success">
@@ -264,13 +264,13 @@ export default function CreateTournament() {
                   Summary
                 </p>
                 {[
-                  ['Title',    form.title || '—'],
-                  ['Sport',    form.sport || '—'],
-                  ['Type',     `${form.type} / ${form.indoorOutdoor}`],
+                  ['Title', form.title || '—'],
+                  ['Sport', form.sport || '—'],
+                  ['Type', `${form.type} / ${form.indoorOutdoor}`],
                   ['Location', `${form.location.venue || '—'}, ${form.location.city || '—'}`],
-                  ['Dates',    `${form.startDate} → ${form.endDate}`],
-                  ['Slots',    `${form.maxSlots} ${form.type === 'team' ? 'teams' : 'players'}`],
-                  ['Fee',      form.entryFee > 0 ? `₹${form.entryFee}` : 'FREE'],
+                  ['Dates', `${form.startDate} → ${form.endDate}`],
+                  ['Slots', `${form.maxSlots} ${form.type === 'team' ? 'teams' : 'players'}`],
+                  ['Fee', form.entryFee > 0 ? `₹${form.entryFee}` : 'FREE'],
                 ].map(([k, v]) => (
                   <div key={k} style={{
                     display: 'flex', justifyContent: 'space-between',

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import ShareButton from '../components/Shared/ShareButton';
+import PaymentModal from '../components/Shared/PaymentModal';
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -22,6 +23,7 @@ export default function TournamentDetail() {
   const [regForm, setRegForm] = useState({ teamName: '', players: [{ ...BLANK_PLAYER }] });
   const [submitting, setSubmitting] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+  const [payOrder, setPayOrder] = useState(null);
 
   /* Fetch tournament + my registration */
   useEffect(() => {
@@ -76,35 +78,12 @@ export default function TournamentDetail() {
       });
 
       if (tournament.entryFee > 0) {
-        /* Razorpay flow */
+        // Open custom payment modal
         const { data: order } = await axios.post('/payments/create-order', {
           registrationId: reg._id,
         });
-        const options = {
-          key: order.keyId,
-          amount: order.amount,
-          currency: order.currency,
-          name: 'Tournament Hub',
-          description: tournament.title,
-          order_id: order.orderId,
-          handler: async (response) => {
-            try {
-              await axios.post('/payments/verify', {
-                ...response,
-                registrationId: reg._id,
-              });
-              toast.success('Payment successful! Registration confirmed 🎉');
-              setShowModal(false);
-              window.location.reload();
-            } catch {
-              toast.error('Payment verification failed – contact host');
-            }
-          },
-          prefill: { name: user.name, email: user.email, contact: user.phone || '' },
-          theme: { color: '#F5B800' },
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+        setShowModal(false);
+        setPayOrder({ ...order, registrationId: reg._id });
       } else {
         toast.success(
           reg.status === 'waitlisted'
@@ -353,6 +332,24 @@ export default function TournamentDetail() {
       </div>
 
       {/* ── Registration Modal ────────────────────────────────── */}
+      {/* Custom Payment Modal */}
+      {payOrder && (
+        <PaymentModal
+          tournament={tournament}
+          registrationId={payOrder.registrationId}
+          orderId={payOrder.orderId}
+          onSuccess={() => {
+            setPayOrder(null);
+            toast.success('Payment successful! Registration confirmed 🎉');
+            window.location.reload();
+          }}
+          onClose={() => {
+            setPayOrder(null);
+            toast.info('Payment cancelled');
+          }}
+        />
+      )}
+
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -429,7 +426,7 @@ export default function TournamentDetail() {
 
             {tournament.entryFee > 0 && (
               <div className="alert alert-info">
-                💳 Entry fee: <strong>₹{tournament.entryFee}</strong> — you will be redirected to Razorpay.
+                💳 Entry fee: <strong>₹{tournament.entryFee}</strong> — secure payment page will open after this.
               </div>
             )}
 

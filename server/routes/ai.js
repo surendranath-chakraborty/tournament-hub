@@ -116,7 +116,7 @@ ABOUT TOURNAMENT HUB:
 - Players can browse, register, and compete in tournaments
 - Built with: MongoDB, Express.js, React 18, Node.js (MERN stack)
 - AI features powered by Groq API (llama-3.3-70b-versatile)
-- Payments via Razorpay (Indian payment gateway)
+- Payments via custom secure payment gateway (Card / UPI / Net Banking)
 - Deployed on Render.com with GitHub auto-deploy
 
 HOST FEATURES:
@@ -134,7 +134,7 @@ HOST FEATURES:
 PLAYER FEATURES:
 1. Browse Tournaments - Filter by sport, city, status, type with pagination
 2. Register Solo/Team - Enter player details (name, email, phone, age) for each member
-3. Pay Entry Fee - Razorpay payment gateway (test card: 4111 1111 1111 1111)
+3. Pay Entry Fee - Secure payment modal with Card, UPI, Net Banking options
 4. Smart Waitlist - Auto join when full, auto-promoted when a slot opens
 5. My Registrations - View all entries with confirmed/waitlisted/withdrawn status
 6. Withdraw - Withdraw before deadline for refund, no refund after withdrawal deadline
@@ -152,7 +152,7 @@ AI FEATURES:
 REGISTRATION & PAYMENT FLOW:
 - Free tournament: Register → Instantly confirmed (if slot available) or waitlisted
 - Paid tournament: Register → Create Razorpay order → Pay → Verify signature → Confirmed
-- Razorpay test card: 4111 1111 1111 1111, any future date, any CVV
+- Any card number works in test mode (e.g. 4111 1111 1111 1111)
 - Refund: Automatic if withdrawn before withdrawal deadline
 - No refund: If withdrawn after withdrawal deadline
 
@@ -179,7 +179,7 @@ TECH STACK DETAILS:
 - Backend: Node.js, Express.js, Mongoose ODM
 - Database: MongoDB Atlas (cloud, free M0 tier)
 - Auth: JWT (30-day expiry) + bcrypt (12 salt rounds)
-- Payment: Razorpay (HMAC-SHA256 signature verification)
+- Payment: Custom secure gateway with server-side order verification
 - AI: Groq API - llama-3.3-70b-versatile model
 - PDF: jsPDF + jsPDF-AutoTable
 - Excel: SheetJS (xlsx)
@@ -199,7 +199,7 @@ API ROUTES:
 - POST /api/tournaments - Create tournament (host only)
 - POST /api/registrations - Register for tournament (player only)
 - DELETE /api/registrations/:id - Withdraw from tournament
-- POST /api/payments/create-order - Create Razorpay order
+- POST /api/payments/create-order - Create payment order
 - POST /api/payments/verify - Verify payment signature
 - POST /api/ai/fixture - Generate tournament bracket
 - POST /api/ai/grounds - Suggest nearby grounds
@@ -222,8 +222,8 @@ A: Browse tournaments → Click any tournament → Click "Register Now" → Fill
 Q: What if tournament is full?
 A: Click "Join Waitlist" → You get auto-promoted when someone withdraws
 
-Q: How does Razorpay work?
-A: After clicking Register, you're redirected to Razorpay checkout. Use test card 4111 1111 1111 1111 in test mode.
+Q: How does payment work?
+A: After clicking Register, a secure payment modal opens with Card, UPI and Net Banking options. Enter card details to pay the entry fee.
 
 Q: How to get a refund?
 A: Withdraw before the withdrawal deadline set by the host. After the deadline, no refund is given.

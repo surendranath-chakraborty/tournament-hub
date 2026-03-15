@@ -9,7 +9,7 @@ const FEATURES = [
   { icon: '🏆', title: 'Host Tournaments', desc: 'Create and manage events with full control over slots, rules, and deadlines.', color: '#F5B800' },
   { icon: '🎮', title: 'Join & Compete', desc: 'Find tournaments near you and register solo or as a team in seconds.', color: '#4B9EE8' },
   { icon: '🤖', title: 'AI-Powered Tools', desc: 'Auto-generate fixtures and discover nearby grounds using Groq AI for free.', color: '#22C97D' },
-  { icon: '💳', title: 'Secure Payments', desc: 'Collect entry fees via Razorpay. Automatic refunds on eligible withdrawals.', color: '#F58B00' },
+  { icon: '💳', title: 'Secure Payments', desc: 'Collect entry fees securely. Automatic refunds on eligible withdrawals.', color: '#F58B00' },
   { icon: '📋', title: 'Smart Waitlist', desc: 'Auto-promote waitlisted players when a confirmed slot opens up.', color: '#E84B4B' },
   { icon: '📺', title: 'Live Streaming', desc: 'Embed YouTube/Twitch streams with live scores and real-time comments.', color: '#9B59B6' },
 ];
@@ -475,7 +475,7 @@ export default function Home() {
         },
           [
             { icon: '🤖', text: 'Groq AI', color: '#22C97D' },
-            { icon: '💳', text: 'Razorpay', color: '#4B9EE8' },
+            { icon: '💳', text: 'Secure Pay', color: '#4B9EE8' },
             { icon: '📺', text: 'Live Streams', color: '#E84B4B' },
             { icon: '📄', text: 'PDF Export', color: '#F58B00' },
           ].map((b, i) =>
@@ -649,7 +649,7 @@ export default function Home() {
     // ── FOOTER ────────────────────────────────────────────────
     React.createElement('footer', { style: { borderTop: '1px solid var(--border)', padding: '2rem 1.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.82rem' } },
       React.createElement('div', { style: { fontFamily: "'Bebas Neue',sans-serif", fontSize: '1.2rem', color: 'var(--gold)', letterSpacing: 2, marginBottom: '0.4rem' } }, 'TOURNAMENT HUB'),
-      '© ' + new Date().getFullYear() + ' Tournament Hub · Built with MERN + Groq AI + Razorpay'
+      '© ' + new Date().getFullYear() + ' Tournament Hub · Built with MERN + Groq AI + Secure Payments'
     )
   );
 }
