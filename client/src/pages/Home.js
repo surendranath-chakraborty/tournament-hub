@@ -431,11 +431,7 @@ export default function Home() {
             transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1) 0.2s',
           }
         },
-          React.createElement(GlitchText, {
-            text: 'HUB',
-            style: { fontFamily: "'Bebas Neue',sans-serif", fontSize: 'inherit', letterSpacing: 'inherit' },
-          }),
-          React.createElement('span', { className: 'shimmer-text', style: { fontFamily: "'Bebas Neue',sans-serif", fontSize: 'inherit', letterSpacing: '3px' } }, ' HUB'),
+          React.createElement('span', { className: 'shimmer-text', style: { fontFamily: "'Bebas Neue',sans-serif", fontSize: 'inherit', letterSpacing: '3px' } }, 'HUB'),
         ),
 
         // Subtitle with typing cursor
