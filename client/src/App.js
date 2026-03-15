@@ -19,6 +19,7 @@ import MyRegistrations from './pages/MyRegistrations';
 import AITools from './pages/AITools';
 import Profile from './pages/Profile';
 import LiveMatch from './pages/LiveMatch';
+import ChatBot from './components/Shared/ChatBot';
 
 /* Route guards */
 function Protected({ children, role }) {
@@ -33,6 +34,7 @@ function AppRoutes() {
   return (
     <>
       <Navbar />
+      <ChatBot />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
