@@ -1,8 +1,53 @@
+# ── Dependencies ─────────────────────────────────────────────
 node_modules/
 client/node_modules/
+
+# ── Build output ──────────────────────────────────────────────
 client/build/
+dist/
+
+# ── Environment files (NEVER commit these - contains secrets) ─
 .env
+.env.local
+.env.development
+.env.production
+.env.test
 *.env
+client/.env
+client/.env.local
+client/.env.development
+client/.env.production
+client/.env.test
+
+# ── Uploads & media ───────────────────────────────────────────
 uploads/
+client/public/uploads/
+
+# ── Logs ──────────────────────────────────────────────────────
 *.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS files ──────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# ── Editor files ──────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ── Firebase ──────────────────────────────────────────────────
+serviceAccountKey.json
+*serviceAccount*.json
+firebase-debug.log
+
+# ── Misc ──────────────────────────────────────────────────────
+.cache/
+.parcel-cache/
+coverage/
