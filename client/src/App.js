@@ -19,6 +19,7 @@ import MyRegistrations from './pages/MyRegistrations';
 import AITools from './pages/AITools';
 import Profile from './pages/Profile';
 import LiveMatch from './pages/LiveMatch';
+import PickRole from './pages/PickRole';
 import ChatBot from './components/Shared/ChatBot';
 
 /* Route guards */
@@ -58,6 +59,8 @@ function AppRoutes() {
 
         <Route path="/tournaments/:id/live"
           element={<Protected><LiveMatch /></Protected>} />
+
+        <Route path="/pick-role" element={<PickRole />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

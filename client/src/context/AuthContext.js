@@ -1,18 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { signInWithGoogle, firebaseSignOut } from '../firebase';
+import { signInWithGoogle, handleRedirectResult, firebaseSignOut } from '../firebase';
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
-axios.defaults.baseURL = '/api';
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || '/api';
+
+// Temp storage for pending Google token (role selection flow)
+var _pendingGoogleToken = null;
+// Temp storage for role (set before redirect)
+var _pendingRole = null;
 
 export function AuthProvider({ children }) {
   var [user, setUser] = useState(null);
   var [loading, setLoading] = useState(true);
+  var [googleLoading, setGoogleLoading] = useState(false);
 
-  // Restore session from localStorage on first load
   useEffect(function () {
+    // 1. Restore existing session
     var stored = localStorage.getItem('th_user');
     if (stored) {
       try {
@@ -23,7 +29,44 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('th_user');
       }
     }
-    setLoading(false);
+
+    // 2. Check if we just came back from a Google redirect
+    setGoogleLoading(true);
+    handleRedirectResult().then(function (result) {
+      if (!result) {
+        setLoading(false);
+        setGoogleLoading(false);
+        return;
+      }
+
+      // We got a token from redirect — now send to backend
+      var role = _pendingRole || localStorage.getItem('th_pending_role') || null;
+
+      axios.post('/auth/google', { idToken: result.idToken, role: role })
+        .then(function (res) {
+          _persist(res.data);
+          localStorage.removeItem('th_pending_role');
+          _pendingRole = null;
+          // Redirect to dashboard
+          window.location.href = '/dashboard';
+        })
+        .catch(function (err) {
+          var msg = err.response && err.response.data && err.response.data.message;
+          if (msg === 'ROLE_REQUIRED') {
+            // Store token, redirect to role-pick page
+            _pendingGoogleToken = result.idToken;
+            localStorage.setItem('th_pending_token', result.idToken);
+            window.location.href = '/pick-role';
+          }
+        })
+        .finally(function () {
+          setLoading(false);
+          setGoogleLoading(false);
+        });
+    }).catch(function () {
+      setLoading(false);
+      setGoogleLoading(false);
+    });
   }, []);
 
   function _persist(data) {
@@ -32,56 +75,49 @@ export function AuthProvider({ children }) {
     setUser(data);
   }
 
-  // ── Email/password login ──────────────────────────────────
   async function login(email, password) {
     var { data } = await axios.post('/auth/login', { email, password });
     _persist(data);
     return data;
   }
 
-  // ── Email/password register ───────────────────────────────
   async function register(formData) {
     var { data } = await axios.post('/auth/register', formData);
     _persist(data);
     return data;
   }
 
-  // ── Google Sign-In ────────────────────────────────────────
-  // role = null means existing user (login flow)
-  // role = 'host' or 'player' means new user (register flow)
+  // Called when user clicks "Sign in with Google"
+  // role = null for login, 'host'/'player' for register
   async function googleAuth(role) {
-    // Step 1: Open Google popup, get Firebase ID token
-    var { idToken } = await signInWithGoogle();
-
-    // Step 2: Send token to our backend to verify and create/find user
-    try {
-      var { data } = await axios.post('/auth/google', { idToken, role });
-      _persist(data);
-      return data;
-    } catch (err) {
-      // Backend says ROLE_REQUIRED — new user needs to pick a role
-      if (err.response && err.response.data && err.response.data.message === 'ROLE_REQUIRED') {
-        // Store token temporarily so we can retry with a role
-        _pendingGoogleToken = idToken;
-        return 'ROLE_REQUIRED';
-      }
-      throw err;
+    if (role) {
+      // Save role so we can use it after redirect comes back
+      _pendingRole = role;
+      localStorage.setItem('th_pending_role', role);
     }
+    // This triggers redirect — page will reload after Google auth
+    await signInWithGoogle();
+    // Code below only runs in local dev popup mode
+    return null;
   }
 
-  // Called after user picks a role for new Google account
+  // Called after user picks role on /pick-role page
   async function googleAuthWithRole(role) {
-    var tokenToUse = _pendingGoogleToken;
-    _pendingGoogleToken = null;
-    var { data } = await axios.post('/auth/google', { idToken: tokenToUse, role });
+    var token = _pendingGoogleToken || localStorage.getItem('th_pending_token');
+    if (!token) throw new Error('No pending Google token. Please try signing in again.');
+
+    var { data } = await axios.post('/auth/google', { idToken: token, role });
     _persist(data);
+    localStorage.removeItem('th_pending_token');
+    _pendingGoogleToken = null;
     return data;
   }
 
-  // ── Logout ────────────────────────────────────────────────
   async function logout() {
     try { await firebaseSignOut(); } catch { }
     localStorage.removeItem('th_user');
+    localStorage.removeItem('th_pending_role');
+    localStorage.removeItem('th_pending_token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   }
@@ -93,9 +129,10 @@ export function AuthProvider({ children }) {
   }
 
   return React.createElement(AuthContext.Provider, {
-    value: { user, loading, login, register, logout, updateUser, googleAuth, googleAuthWithRole },
+    value: {
+      user, loading, googleLoading,
+      login, register, logout, updateUser,
+      googleAuth, googleAuthWithRole,
+    },
   }, children);
 }
-
-// Module-level temp storage for pending Google token
-var _pendingGoogleToken = null;
