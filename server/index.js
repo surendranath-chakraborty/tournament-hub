@@ -12,7 +12,8 @@ const app = express();
 app.use(helmet({
   contentSecurityPolicy: false,       // disabled so React build works
   crossOriginEmbedderPolicy: false,   // needed for Firebase auth
-  crossOriginOpenerPolicy: false,     // IMPORTANT: allows Firebase Google popup/redirect
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,     // IMPORTANT: allows Firebase Google popup/redirect
 }));
 
 // ── CORS ──────────────────────────────────────────────────────
