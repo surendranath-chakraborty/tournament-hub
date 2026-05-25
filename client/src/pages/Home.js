@@ -371,7 +371,7 @@ export default function Home() {
     ),
 
     // ── FOOTER ────────────────────────────────────────────────
-    React.createElement('footer', { style: { borderTop: '1px solid var(--border)', padding: '2rem 1.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.82rem' } },
+    React.createElement('footer', { style: { borderTop: '1px solid var(--border)', padding: '2rem 1.5rem', textAlign: 'center', color: '#B8B8C5', fontSize: '0.82rem' } },
       React.createElement('div', { style: { fontFamily: "'Bebas Neue',sans-serif", fontSize: '1.2rem', color: 'var(--gold)', letterSpacing: 2, marginBottom: '0.4rem' } }, 'TOURNAMENT HUB'),
       '© ' + new Date().getFullYear() + ' Tournament Hub · Built with MERN + Groq AI + Secure Payments'
     )
