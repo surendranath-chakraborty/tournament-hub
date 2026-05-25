@@ -219,7 +219,7 @@ export default function Home() {
     .ticker-item:hover { background:rgba(245,184,0,0.12)!important; border-color:rgba(245,184,0,0.4)!important; transform:scale(1.05); }
   `;
 
-  return React.createElement('div', { style: { paddingTop: 64, overflowX: 'hidden' } },
+  return React.createElement('main', { style: { paddingTop: 64, overflowX: 'hidden' } },
     React.createElement('style', null, CSS),
 
     // ── HERO ──────────────────────────────────────────────────
